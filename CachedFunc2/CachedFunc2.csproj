@@ -8,6 +8,9 @@
     <Description>This library is used to create a cached function. The return value of the function is cached with IMemoryCache.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>CachedFunc MemoryCache IMemoryCache Cache</PackageTags>
+    <RepositoryUrl>https://github.com/jxdking/CachedFunc2</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageProjectUrl>https://github.com/jxdking/CachedFunc2</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
