@@ -28,5 +28,6 @@ int result = cachedFunc(12345);
 ```
 
 ## Options
-```CachedFuncSvc.Create()``` accepts ```MemoryCacheEntryOptions``` argument. In the backend, it creates a MemoryCache entry for every combination of all the arguments of the target function. Each entry will be added to MemoryCache with the same ```MemoryCacheEntryOptions``` provided.
+```CachedFuncSvc.Create()``` accepts ```MemoryCacheEntryOptions``` argument. In the backend, it creates a MemoryCache entry with all the arguments at the time the ```CachedFunc<>``` is called. On the following calls to the  ```CachedFunc<>```, the cached value will be returned as long as the cache is not expired based on the ```MemoryCacheEntryOptions```.
+
 For the entry with ```MemoryCacheEntryOptions.Property.NeverRemove```, the Cache will be eager loaded as soon as the current cache entry is expired.
