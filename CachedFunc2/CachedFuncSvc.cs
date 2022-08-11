@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MagicEastern.CachedFunc2
 {
@@ -25,14 +24,12 @@ namespace MagicEastern.CachedFunc2
         /// <typeparam name="T">Should be one of ValueTuple<>. The maximun number of arguments of the ValueTuple is 7.</typeparam>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="func">The input function, should only contain one argument in Type T.</param>
-        /// <param name="options">The options for the behavior of MemoryCache. 
-        /// If the CacheItemPriority is NeverRemove, the cache will be reloaded immediately after it expires.</param>
+        /// <param name="optionsFactory">The factory to create options for the behavior of MemoryCache.</param>
         /// <returns>Return a cached version of the input function. Add an extra bool parameter to enable/disable the cache.</returns>
-        public Func<T, bool, TResult> Create<T, TResult>(Func<T, TResult> func, MemoryCacheEntryOptions options = null)
+        public Func<T, bool, TResult> Create<T, TResult>(Func<T, TResult> func, Func<T, MemoryCacheEntryOptions> optionsFactory)
             where T : IComparable, IComparable<T>, IEquatable<T>, IStructuralComparable, IStructuralEquatable
         {
             var funcID = Interlocked.Increment(ref _funcID);
-
             ConcurrentDictionary<T, object> locks = new ConcurrentDictionary<T, object>();
 
             Func<T, bool, TResult> cachedFunc = (input, nocache) =>
@@ -53,7 +50,7 @@ namespace MagicEastern.CachedFunc2
                         return obj;
                     }
                     obj = func(input);
-                    cache.Set(key, obj, options);
+                    cache.Set(key, obj, optionsFactory?.Invoke(input));
                     return obj;
                 }
                 finally
@@ -62,29 +59,6 @@ namespace MagicEastern.CachedFunc2
                     Monitor.Exit(lockObj);
                 }
             };
-
-            if (CacheItemPriority.NeverRemove.Equals(options?.Priority))
-            {
-                options.RegisterPostEvictionCallback((key, value, reason, state) =>
-                {
-                    /* 
-                     * Add back the cache immediately, and call cachedFunc() with nocache = true,
-                     * so that there is no downtime during getting the updated results for this cache.
-                     */
-                    cache.Set(key, value);
-                    var ck = (CacheKey<T>)key;
-                    _ = cachedFunc(ck.Key, true);
-                });
-
-                if (typeof(T) == typeof(ValueTuple))
-                {
-                    Task.Run(() =>
-                    {
-                        // the original function does not have any parameter. Eager load the cache.
-                        _ = cachedFunc(default(T), true);
-                    });
-                }
-            }
 
             return cachedFunc;
         }

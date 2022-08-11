@@ -28,7 +28,8 @@ namespace TestCore
 
         static Task<int> CreateTask(int n, int taskid, Func<int, int> func)
         {
-            Task<int> t = new Task<int>(() => {
+            Task<int> t = new Task<int>(() =>
+            {
                 int ret = func(n);
                 Console.WriteLine($"Task {taskid} finished!");
                 return ret;
@@ -36,14 +37,16 @@ namespace TestCore
             return t;
         }
 
-        static void NeverRemoveTest() {
-            var opts = new MemoryCacheEntryOptions {
+        static void NeverRemoveTest()
+        {
+            var opts = new MemoryCacheEntryOptions
+            {
                 Priority = CacheItemPriority.NeverRemove,
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(0.5)
             };
-            
-            var cachedFunc = svc.Create(SlowFunc, opts);
-            Thread.Sleep(2000);
+
+            var cachedFunc = svc.Create(SlowFunc, () => opts);
+            Thread.Sleep(10000);
             Console.WriteLine("Calling Eager Loaded CachedFunc ...");
             _ = cachedFunc();
             Console.WriteLine("Done");
@@ -100,7 +103,10 @@ namespace TestCore
             }
 
             Console.WriteLine("Using MemoryCache");
-            CachedFunc<int, int> cachedFunc = svc.Create<int, int>(SomeFunc, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = new TimeSpan(1, 0, 0) });
+            CachedFunc<int, int> cachedFunc = svc.Create<int, int>(SomeFunc, (_) =>
+            {
+                return new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = new TimeSpan(1, 0, 0) };
+            });
             BenchMarkCachedFunc<int, int>(SomeFunc, cachedFunc, ary, VerifyResults);
             Console.WriteLine("");
         }

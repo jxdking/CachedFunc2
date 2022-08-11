@@ -11,6 +11,7 @@
     <RepositoryUrl>https://github.com/jxdking/CachedFunc2</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
     <PackageProjectUrl>https://github.com/jxdking/CachedFunc2</PackageProjectUrl>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
